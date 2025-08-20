@@ -1,6 +1,6 @@
 import array, time, rp2
 # from driver_patterns import fadeOut, cycleColours
-
+from colorsys import hsv_to_rgb
 from driver import ws2812 #local
 from machine import Pin
 
@@ -14,7 +14,7 @@ GREEN = (0, 25, 0)
 CYAN = (0, 20, 25)
 BLUE = (0, 0, 25)
 MAG = (18, 0, 25)
-COLORS = (RED, YELLOW, GREEN, CYAN, BLUE, MAG)
+COLS = (RED, YELLOW, GREEN, CYAN, BLUE, MAG)
 
 
 ## INIT ##
@@ -35,52 +35,47 @@ for i in panels.keys():
 
 
 ## Functions ##
-def pixels_fill(color):
+def pixels_fill(col):
     for i in range(NUM_LEDS):
-        pixels[i] = (color[1]<<16) + (color[0]<<8) + color[2]
+        pixels[i] = col[1]<<16 | col[0]<<8 | col[2]
+    
 
-def wheel(pos):
-    if pos < 0 or pos > 255:
-        return (0, 0, 0)
-    if pos < 85:
-        return (255 - pos * 3, pos * 3, 0)
-    if pos < 170:
-        pos -= 85
-        return (0, 255 - pos * 3, pos * 3)
-    else:
-        pos -= 170
-        return (pos * 3, 0, 255 - pos * 3)
+def wheel2(hue=0.5, sat=1.0, v_bright=0.2):
+    r,g,b = hsv_to_rgb(hue, sat, v_bright)
+    return ( int(round(255*r)), int(round(255*g)), int(round(255*b)) )
  
  
 def rainbow():
-    for j in range(255):
-        for i in range(NUM_LEDS):
-            rc_index = (i * 256 // NUM_LEDS) + j
-            pixels[i] = wheel(rc_index & 255)
+    for i in range(NUM_LEDS):
+        h = i*1.0/NUM_LEDS
+        col = wheel2(hue = h)
+        pixels[i] = col[1]<<16 | col[0]<<8 | col[2] 
+
 
 
 
 ############ Execution ##############
 for i in panels.keys():
-    pixels_fill(COLORS[i])
+    pixels_fill(COLS[i])
     panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1) #wait for full load
+    time.sleep_ms(delay_1)
 
-time.sleep(5)
+time.sleep_ms(2000)
 
+
+rainbow()
 for i in panels.keys():
-    rainbow()
     panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1) #wait for full load
+    time.sleep_ms(delay_1)
 
 
 ## Idle ##
-time.sleep(5)
+time.sleep_ms(10000)
 
 pixels_fill(BLACK)
 
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1) #wait for full load
+    time.sleep_ms(delay_1)
     panels[i][1].active(0)
 
