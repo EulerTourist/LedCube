@@ -28,6 +28,20 @@ from ucollections import deque
 from micropython import schedule
 from machine import Timer
 
+
+class Px:
+    def __init__(self, posi, colour):
+        self.posi = posi #int of PXY
+        self.colour = colour #int of RGB
+
+class Snake:
+    def __init__(self, dir, age, pixels):
+        self.dir = dir #integer
+        self.age = age #integer
+        self.pixels = pixels #deque
+
+# class SnakeGame:
+
 # queue = deque()
 maxsnakes = 1
 snakes = deque([], maxsnakes)
@@ -47,7 +61,7 @@ turns = { # key off current direction to get possible turns
     '9': ['6', '12'] # to left of panel
 }
 
-# this is currently specific to Cube, along with edgeTransform
+
 cube_idx = [ b'U', b'D', b'F', b'B', b'L', b'R']
 cube_tfm = { # key off current panel to get (target panel, transform)
     0: [(3,3), (5,4), (2,5), (4,6)], # 0/90/180/270
@@ -58,32 +72,10 @@ cube_tfm = { # key off current panel to get (target panel, transform)
     5: [(0,10), (3,1), (1,18), (2,2)]
 }
 
-panels = { 
-        0: [0] * (panPxPerEdge*panPxPerEdge),
-        1: [0] * (panPxPerEdge*panPxPerEdge),
-        2: [0] * (panPxPerEdge*panPxPerEdge),
-        3: [0] * (panPxPerEdge*panPxPerEdge),
-        4: [0] * (panPxPerEdge*panPxPerEdge),
-        5: [0] * (panPxPerEdge*panPxPerEdge)
-    }
 
-
-class Px:
-    def __init__(self, posi, colour):
-        self.posi = posi #int of PXY
-        self.colour = colour #int of RGB
-
-class Snake:
-    def __init__(self, dir, age, pixels):
-        self.dir = dir #integer
-        self.age = age #integer
-        self.pixels = pixels #deque
-
-### this is Class below here ###
 
 def timerHandler(t): #one second timer, we might split this to 100ms update and 1-10sec new snake
     schedule(iteration, 1)
-
 
 def iteration(t):
     if snakes[-1].age >= age_of_death:
@@ -150,9 +142,8 @@ def stepSnake(s): #add pixel to head of given snake
     s.age+=1
     if s.age > 2 and s.age%growth_rate: #extend length every Nth, otherwise delete the last pixel, effectively moving it along
         tail = s.pixels.pop()
-    
 
-# this is currently specific to Cube, along with cube_tfm lookup NOTE
+
 def edgeTransformCube(pan, x, y, dir):
     # print('edgeTransform:', pan, x, y, dir)
     pan1, transform = cube_tfm[pan][dir] #lookup
@@ -213,7 +204,7 @@ def edgeTransformWall(pan, x, y, dir):
     #       if its an edge, randomly turn either way in the usual way
     #       if its a corner, turn within the constraint
     #       update dir, pan, x OR y
-      
+    
     h_idx = pan%panAcross
     v_idx = pan//panAcross
 
@@ -254,21 +245,20 @@ def colourSnake(s):
 def renderSnakes():
     # the last snake should be be displayed last
     # the last pixel in a snake should be be displayed last
-    # pan is panel
     # position = y x panPxPerEdge + x
     for s in snakes:
         for p in s.pixels:
             pan = p.posi>>16 & 0xFF
             x = p.posi>>8 & 0xFF
             y = p.posi & 0xFF
-            panels[pan][y*panPxPerEdge + x] = p.colour
-    shiftleft = 8
-    pio[0].put(panels[0], shiftleft)
-    pio[1].put(panels[1], shiftleft)
-    pio[2].put(panels[2], shiftleft)
-    pio[3].put(panels[3], shiftleft)
-    pio[4].put(panels[4], shiftleft)
-    pio[5].put(panels[5], shiftleft)
+            # panels[pan][y*panPxPerEdge + x] = p.colour
+    # shiftleft = 8
+    # pio[0].put(panels[0], shiftleft)
+    # pio[1].put(panels[1], shiftleft)
+    # pio[2].put(panels[2], shiftleft)
+    # pio[3].put(panels[3], shiftleft)
+    # pio[4].put(panels[4], shiftleft)
+    # pio[5].put(panels[5], shiftleft)
 
 
 def printSnake(s):
@@ -277,29 +267,49 @@ def printSnake(s):
     y = s.pixels[0].posi & 0xFF
     cols = list(map(lambda p: hex(p.colour), s.pixels))
     print(
-          'id:', hex(id(s)), 
-          'dir:', s.dir,
-          'length:', len(s.pixels),
+        'id:', hex(id(s)), 
+        'dir:', s.dir,
+        'length:', len(s.pixels),
         #   'pixels:', cols,
-          'panel:', cube_idx[pan], #cube_idx[pan],
-          'x:', x,
-          'y:', y,
-          'age:', s.age
+        'panel:', cube_idx[pan], #cube_idx[pan],
+        'x:', x,
+        'y:', y,
+        'age:', s.age
     )
 
-def __init__(self, pio):
-    self.pio = pio
+
+def run(pans, px_per_edge):
+    print('init runs...')
+    global panels
+    panels = pans
+    global panPxPerEdge 
+    panPxPerEdge = px_per_edge
+
+    # panels = { 
+#         0: [0] * (panPxPerEdge*panPxPerEdge),
+#         1: [0] * (panPxPerEdge*panPxPerEdge),
+#         2: [0] * (panPxPerEdge*panPxPerEdge),
+#         3: [0] * (panPxPerEdge*panPxPerEdge),
+#         4: [0] * (panPxPerEdge*panPxPerEdge),
+#         5: [0] * (panPxPerEdge*panPxPerEdge)
+#     }
+            #pixels = array.array("I", [0 for _ in range(NUM_LEDS)])
+
+    makeSnake() # make the first snake
+    for i in range(16):
+        iteration(1)
+        time.sleep(0.1)
 
 
 ################### TEST ####################
-panPxPerEdge = 8
+# panPxPerEdge = 8
 # timer1 = Timer(-1).init(period=2000, mode=Timer.PERIODIC, callback=timerHandler) #one second timer
-makeSnake() # make the first snake
-for i in range(16):
-    iteration(1)
+# makeSnake() # make the first snake
+# for i in range(16):
+#     iteration(1)
     # printSnake(snakes[0])
     # stepSnake(snakes[0])
-    time.sleep(0.1)
+    # time.sleep(0.1)
 # while True:
 #     pass
 

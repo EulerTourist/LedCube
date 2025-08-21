@@ -31,8 +31,8 @@ def wheel1():
             else: return 
 
 
-def wheel2(hue=0.5, sat=1.0, v_bright=1.0):
-    r,g,b = hsv_to_rgb(hue, sat, v_bright)
+def wheel2(hue=0.5, sat=1.0, val_br=1.0):
+    r,g,b = hsv_to_rgb(hue, sat, val_br)
     return ( int(round(255*r)), int(round(255*g)), int(round(255*b)) )
 
 

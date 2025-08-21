@@ -3,8 +3,8 @@ class Test:
     var2 = 22 # default value that will be overrided by the instance
 
     def __init__(self, v2, v3):
-        self.var2 = v2
-        self.var3 = v3 # a variable 
+        self.var2 = v2 # class variable - cls
+        self.var3 = v3 # instance variable - self
 
     def __str__(self):
         return f"{self.var1} {self.var2} {self.var3}"
