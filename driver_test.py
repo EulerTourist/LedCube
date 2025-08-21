@@ -3,6 +3,8 @@ import array, time, rp2
 from colorsys import hsv_to_rgb
 from driver import ws2812 #local
 from machine import Pin
+# from snakes import run
+import snakes
 
 NUM_LEDS = 256
 delay_1 = 20
@@ -20,6 +22,7 @@ COLS = (RED, YELLOW, GREEN, CYAN, BLUE, MAG)
 ## INIT ##
 panels = {  #up, down, front, back, left, right
     0: [0, None], # sm_id: [pin, sm]
+    1: [1, None],
     2: [2, None],
     3: [3, None],
     4: [4, None],
@@ -40,15 +43,15 @@ def pixels_fill(col):
         pixels[i] = col[1]<<16 | col[0]<<8 | col[2]
     
 
-def wheel2(hue=0.5, sat=1.0, v_bright=0.2):
-    r,g,b = hsv_to_rgb(hue, sat, v_bright)
+def wheel2(hue=0.5, sat=1.0, val_br=0.2):
+    r,g,b = hsv_to_rgb(hue, sat, val_br)
     return ( int(round(255*r)), int(round(255*g)), int(round(255*b)) )
  
  
 def rainbow():
     for i in range(NUM_LEDS):
         h = i*1.0/NUM_LEDS
-        col = wheel2(hue = h)
+        col = wheel2(hue = h, val_br=0.1)
         pixels[i] = col[1]<<16 | col[0]<<8 | col[2] 
 
 
@@ -59,21 +62,25 @@ for i in panels.keys():
     pixels_fill(COLS[i])
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-
-time.sleep_ms(2000)
-
+time.sleep_ms(1000)
 
 rainbow()
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-
-
-## Idle ##
-time.sleep_ms(10000)
+time.sleep_ms(5000)
 
 pixels_fill(BLACK)
+for i in panels.keys():
+    panels[i][1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+    panels[i][1].active(0)
 
+snakes.run(panels, 16)
+time.sleep_ms(5000)
+
+## Idle ##
+pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
