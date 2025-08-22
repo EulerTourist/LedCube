@@ -33,7 +33,7 @@ pixels = array.array("I", [0 for _ in range(NUM_LEDS)])
 
 
 for i in panels.keys():
-    panels[i][1] = rp2.StateMachine(i, ws2812, freq=8_000_000, sideset_base=Pin(panels[i][0]))
+    panels[i][1] = rp2.StateMachine(i, ws2812, freq=8_000_000, sideset_base=Pin(panels[i][0])) # pyright: ignore[reportCallIssue]
     panels[i][1].active(1)
 
 
@@ -44,7 +44,7 @@ def pixels_fill(col):
     
 
 def wheel2(hue=0.5, sat=1.0, val_br=0.2):
-    r,g,b = hsv_to_rgb(hue, sat, val_br)
+    r,g,b = hsv_to_rgb(hue, sat, val_br) # pyright: ignore[reportGeneralTypeIssues]
     return ( int(round(255*r)), int(round(255*g)), int(round(255*b)) )
  
  
@@ -64,22 +64,22 @@ for i in panels.keys():
     time.sleep_ms(delay_1)
 time.sleep_ms(1000)
 
-rainbow()
-for i in panels.keys():
-    panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-time.sleep_ms(5000)
+# rainbow()
+# for i in panels.keys():
+#     panels[i][1].put(pixels, 8)
+#     time.sleep_ms(delay_1)
+# time.sleep_ms(1000)
 
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-    panels[i][1].active(0)
 
-snakes.run(panels, 16)
-time.sleep_ms(5000)
+snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
+time.sleep_ms(9000)
 
 ## Idle ##
+print("sleeping")
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)

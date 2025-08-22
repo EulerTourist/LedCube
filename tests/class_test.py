@@ -8,8 +8,20 @@ class Test:
 
     def __str__(self):
         return f"{self.var1} {self.var2} {self.var3}"
+    
+
+class Dog:
+    species = "Canis familiaris"
+    def __init__(self, name, age):
+       self.name = name
+       self.age = age
 
 
-t = Test(31, 32)
+s = Dog("Henry", 9)
+Dog.species = "Dawg"
+t = Dog("Max", 3)
+t.species = "Gawd Knows"
+t.name = "Naughty Max"
 
-print(t)
+
+print(s.name, s.species, t.name, t.species)
