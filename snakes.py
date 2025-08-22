@@ -243,7 +243,7 @@ def wheel2(hue=0.333, sat=1.0, val_br=0.1):
     red = int(round(255*r))
     green = int(round(255*g))
     blue = int(round(255*b))
-    return red<<8 | green<<16 | blue
+    return red<<8 | green<<16 | blue #flip the colours around
 
 
 def colourSnake(s):

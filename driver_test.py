@@ -64,19 +64,19 @@ for i in panels.keys():
     time.sleep_ms(delay_1)
 time.sleep_ms(1000)
 
-# rainbow()
-# for i in panels.keys():
-#     panels[i][1].put(pixels, 8)
-#     time.sleep_ms(delay_1)
-# time.sleep_ms(1000)
+rainbow()
+for i in panels.keys():
+    panels[i][1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+time.sleep_ms(1000)
 
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
 
-snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
-time.sleep_ms(9000)
+# snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
+# time.sleep_ms(9000)
 
 ## Idle ##
 print("sleeping")

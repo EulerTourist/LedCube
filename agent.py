@@ -6,7 +6,7 @@ import time
 import rp2
 # from rp2 import StateMachine
 from driver import ws2812
-import driver_patterns
+import tests.driver_patterns as driver_patterns
 
 MY_ADDR = 1
 WR_OFFSET = 8
