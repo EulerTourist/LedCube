@@ -39,7 +39,7 @@ for i in panels.keys():
 
 ## Functions ##
 def pixels_fill(col):
-    for i in range(NUM_LEDS):
+    for i in range(NUM_LEDS): #
         pixels[i] = col[1]<<16 | col[0]<<8 | col[2]
     
 
@@ -58,28 +58,28 @@ def rainbow():
 
 
 ############ Execution ##############
-for i in panels.keys():
-    pixels_fill(COLS[i])
-    panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-time.sleep_ms(1000)
+# for i in panels.keys():
+#     pixels_fill(COLS[i])
+#     panels[i][1].put(pixels, 8)
+#     time.sleep_ms(delay_1)
+# time.sleep_ms(1000)
 
 rainbow()
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-time.sleep_ms(1000)
+time.sleep_ms(2000)
 
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
 
-# snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
-# time.sleep_ms(9000)
+snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
+time.sleep_ms(9000)
 
 ## Idle ##
-print("sleeping")
+print("Done...")
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)

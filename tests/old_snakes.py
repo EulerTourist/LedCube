@@ -1,8 +1,34 @@
+# Names of cube_tfmcube faces:
+#           ^
+#           D
+#           |
+#           B                   0,0 1,0 -> W,0
+#           v                   0,1 ---->   |
+#           ^                    | ---->    |
+#  L> ----- U ----- <R           | --->     |
+#           |                   0,H ->     W,H
+#           ^
+#           F
+# 
+# Snake: 
+# red head=1, body of alternate greens
+# new snake starts on random pixel and random direction (U,D,L,R), start one straight away then every rand()*10sec 
+# each snake moves by one pixel each step, L=-1, R=+1, U=-W, D=+W in the current direction, update all pixels
+# however, preceding the step, snake may change direction turning left or right with a probablity of P=1/(4*(H+W)) 
+# if the snake reaches the edge of the panel, go adjacent panel
+# snake starts with body=0 and extends by one each time it crosses an edge, that is, not deleting last
+# snake fades out when length attempts to increment to max length N=2*(H+W), that is, at edge
+# Specs:
+# px = (0pxy, 0rgb)
+# snake = { dir: <U/D/L/R/Fade>, bright:<byte>, px: deque}
+# NB: calculate as RGB but GRB on the pixel
+
 import random, time, array
 from ucollections import deque
 from micropython import schedule
 from machine import Timer
 from colorsys import hsv_to_rgb
+
 
 class Px:
     def __init__(self, posi, colour):
@@ -10,7 +36,6 @@ class Px:
         self.colour = colour #int of RGB
 
 class Snake:
-    age = 0
     def __init__(self, dir, age, pixels):
         self.dir = dir #integer
         self.age = age #integer
@@ -19,14 +44,14 @@ class Snake:
 # class SnakeGame:
 
 # queue = deque()
-maxsnakes = 3
+maxsnakes = 1
 snakes = deque([], maxsnakes)
 panPxPerEdge = 4; panAcross = 4; panDown = 4
 turniness = 10 # higher means lower probablity of turning this iteration
 fertility = 100 # higher means lower probablity of creating a snake this iteration
-maxsnakelen = 10
+maxsnakelen = 3*panPxPerEdge
 growth_rate = 10 # cycles till next lengthening
-age_of_death = 50
+age_of_death = 999
 shiftleft = 8 # at sm.put(array, shift)
 
 turns_idx = ['12', '3', '6', '9']
@@ -37,22 +62,25 @@ turns = { # key off current direction to get possible turns
     '9': ['6', '12'] # to left of panel
 }
 
+
 cube_idx = [ b'U', b'D', b'F', b'B', b'L', b'R']
 cube_tfm = { # key off current panel to get (target panel, transform)
     0: [(3,3), (5,4), (2,5), (4,6)], # 0/90/180/270
-    1: [(2,11), (5,12), (3,13), (4,14)],
+    1: [(2,11), (4,12), (3,13), (5,14)],
     2: [(0,7), (5,1), (1,15), (4,2)],
     3: [(0,8), (4,1), (1,16), (5,2)],
     4: [(0,9), (2,1), (1,17), (3,2)],
     5: [(0,10), (3,1), (1,18), (2,2)]
 }
 
+
+
 def timerHandler(t): #one second timer, we might split this to 100ms update and 1-10sec new snake
     schedule(iteration, 1)
 
 
 def iteration(t):
-    if len(snakes) and snakes[-1].age >= age_of_death: 
+    if snakes[-1].age >= age_of_death:
         snakes.popleft() #delete the last snake, will it ever be anything other than the last?
     # randomly create new snake if snakes queue not maxed out
     if len(snakes) < maxsnakes:
@@ -71,13 +99,13 @@ def makeSnake():
     y = random.randint(0, panPxPerEdge-1)
     p = pan<<16 
     posi = p<<16 | x<<8 | y
-    colour = RED #red
+    colour = wheel2(hue=0) #red
     #Pixel List
-    pix = deque([Px( posi, colour)], maxsnakelen) #new Px list for this snake, maxlen
+    segments = deque([Px( posi, colour)], maxsnakelen) #new Px list for this snake, maxlen
     #random direction
-    dir = turns_idx[random.randint(0, 3)]
+    direction = turns_idx[random.randint(0, 3)]
     #make a snake and add it to snakes list
-    snake = Snake( dir, 1, pix ) #dir, age, pixels
+    snake = Snake( direction, 1, segments ) #dir, age, pixels
     # print(hex(id(snake)))
     snakes.append(snake)
 
@@ -108,14 +136,13 @@ def stepSnake(s): #add pixel to head of given snake
 
     #create a new pixel and add it to front of snakes Px queue
     posi = pan<<16 | x<<8 | y
-    colour = RED #Full Red Head 
+    colour = 0xFF<<16 #Full Red Head 
     head = Px( posi, colour)
     s.pixels.appendleft(head)
     # decide whether to extend the tail
     s.age+=1
-    if len(s.pixels) > maxsnakelen: #and s.age%growth_rate: #extend length every Nth, otherwise delete the last pixel, effectively moving it along
-        s.pixels.pop()
-    print('px_len:', len(s.pixels))
+    if s.age > 2 and s.age%growth_rate: #extend length every Nth, otherwise delete the last pixel, effectively moving it along
+        tail = s.pixels.pop()
 
 
 def edgeTransformCube(pan, x, y, dir):
@@ -218,12 +245,10 @@ def wheel2(hue=0.333, sat=1.0, val_br=0.1):
     blue = int(round(255*b))
     return red<<8 | green<<16 | blue #flip the colours around
 
-RED = wheel2(hue=0.0)
-GREEN = wheel2(val_br=0.05)
 
 def colourSnake(s):
     if len(s.pixels) > 1:
-        s.pixels[1].colour = GREEN
+        s.pixels[1].colour = wheel2(val_br=0.05)
 
 
 def renderSnakes(arrays):
@@ -277,7 +302,9 @@ def runCube(pans, px_per_edge):
     }
             
     makeSnake() # make the first snake
-    for i in range(1000):
+    for i in range(32):
         iteration(1)
         time.sleep(0.1)
         renderSnakes(arrays)
+
+
