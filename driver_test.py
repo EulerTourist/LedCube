@@ -1,10 +1,10 @@
 import array, time, rp2
-# from driver_patterns import fadeOut, cycleColours
-from colorsys import hsv_to_rgb
-from driver import ws2812 #local
 from machine import Pin
-# from snakes import run
-import snakes
+
+from colorsys import hsv_to_rgb # Local
+from font import font, flatten # Local
+from driver import ws2812 #local
+import snakes #local
 
 NUM_LEDS = 256
 delay_1 = 20
@@ -21,12 +21,12 @@ COLS = (RED, YELLOW, GREEN, CYAN, BLUE, MAG)
 
 ## INIT ##
 panels = {  #up, down, front, back, left, right
-    0: [0, None], # sm_id: [pin, sm]
-    1: [1, None],
-    2: [2, None],
-    3: [3, None],
-    4: [4, None],
-    5: [5, None]
+    0: [0, None, None], # sm_id: [pin, sm_ref, array]
+    1: [1, None, None],
+    2: [2, None, None], # TODO make this a tuple
+    3: [3, None, None],
+    4: [4, None, None],
+    5: [5, None, None]
 }
 
 pixels = array.array("I", [0 for _ in range(NUM_LEDS)])
@@ -58,31 +58,54 @@ def rainbow():
 
 
 ############ Execution ##############
-# for i in panels.keys():
-#     pixels_fill(COLS[i])
-#     panels[i][1].put(pixels, 8)
-#     time.sleep_ms(delay_1)
-# time.sleep_ms(1000)
+## Faces TODO FIX
+pixels = array.array("I", flatten(font['U']))
+panels[0][1].put(pixels, 8)
+time.sleep_ms(delay_1)
 
+pixels = array.array("I", flatten(font['D']))
+panels[1][1].put(pixels, 8)
+time.sleep_ms(delay_1)
+
+pixels = array.array("I", flatten(font['F']))
+panels[2][1].put(pixels, 8)
+time.sleep_ms(delay_1)
+
+pixels = array.array("I", flatten(font['B']))
+panels[3][1].put(pixels, 8)
+time.sleep_ms(delay_1)
+
+pixels = array.array("I", flatten(font['L']))
+panels[4][1].put(pixels, 8)
+time.sleep_ms(delay_1)
+
+pixels = array.array("I", flatten(font['R']))
+panels[5][1].put(pixels, 8)
+time.sleep_ms(1000)
+
+# Hearts
+pixels = array.array("I", flatten(font['H']))
+for pan in panels.values():
+    pan[1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+time.sleep_ms(1000)
+
+# Rainbow
 rainbow()
-for i in panels.keys():
-    panels[i][1].put(pixels, 8)
+for pan in panels.values():
+    pan[1].put(pixels, 8)
     time.sleep_ms(delay_1)
-time.sleep_ms(2000)
+time.sleep_ms(1000)
 
-pixels_fill(BLACK)
-for i in panels.keys():
-    panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-
-snakes.runCube(panels, 16) # pass info about machines, machine to panel pin, and size of panels
-time.sleep_ms(9000)
+# Snakes
+snakes.runCube(panels, 16, 100) # pass info about machines, machine to panel pin, and size of panels
+time.sleep_ms(1000)
 
 ## Idle ##
-print("Done...")
 pixels_fill(BLACK)
 for i in panels.keys():
     panels[i][1].put(pixels, 8)
     time.sleep_ms(delay_1)
     panels[i][1].active(0)
 
+print("Done...")
