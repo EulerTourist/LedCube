@@ -1,15 +1,10 @@
-from machine import Timer, Pin
-
-led0 = Pin(24, mode=Pin.OUT) # using WeAct V10 board
-led1 = Pin(25, mode=Pin.OUT)
-led1.on()
+from machine import Timer
+import time
+tim = Timer(-1)
 
 def callback(x):
-    print("cb", x)
-    led0.toggle()
-    led1.toggle()
+    print('poing',x)
 
-tim = Timer(-1, period=500, mode=Timer.PERIODIC, callback=callback)
+tim.init(period=300, mode=Timer.PERIODIC, callback=callback(1))
 
-while True:
-    pass
+time.sleep(11)

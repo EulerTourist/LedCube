@@ -6,8 +6,8 @@ from colorsys import hsv_to_rgb
 
 class Px:
     def __init__(self, posi, colour):
-        self.posi = posi #int of PXY
-        self.colour = colour #int of RGB
+        self.posi = posi #int of PXY TODO use a byte array here bytes[3]
+        self.colour = colour #int of RGB TODO use a byte array here bytes[3]
 
 class Snake:
     age = 1
@@ -17,17 +17,16 @@ class Snake:
         self.body = body
         self.pixels = pixels #deque
 
-# class SnakeGame:
-
-# queue = deque()
-maxsnakes = 9
+PIN = 0; SM = 1; AR = 2
+maxsnakes = 4
+maxage = 32
+maxsnakelen = 10
 snakes = deque([], maxsnakes)
 panPxPerEdge = 4; panAcross = 4; panDown = 4
 turniness = 10 # higher means lower probablity of turning this iteration
 fertility = 25 # higher means lower probablity of creating a snake this iteration
-maxsnakelen = 10
 growth_rate = 10 # cycles till next lengthening
-age_of_death = 50
+
 shiftleft = 8 # at sm.put(array, shift)
 
 turns_idx = ['12', '3', '6', '9']
@@ -48,24 +47,23 @@ cube_tfm = { # key off current panel to get (target panel, transform)
     5: [(0,10), (3,1), (1,18), (2,2)]
 }
 
-timer = Timer(-1)
+tim = Timer(-1)
 
 
 def timerHandler(t): 
-    schedule(iteration, 1)
+    schedule(iteration, t)
 
 
 def iteration(t):
-    if len(snakes) < maxsnakes:
+    if len(snakes) < maxsnakes or snakes[0].age >= maxage:
         r = random.randint(1, fertility) 
         if r == 1: makeSnake()
+
     for snake in snakes:
-        if snake.age >= age_of_death:
-            del snake
-        else:
-            stepSnake(snake)
-            colourSnake(snake)
-            # printSnake(snake)
+        stepSnake(snake)
+        colourSnake(snake)
+        # printSnake(snake)
+
     renderSnakes()
 
 
@@ -236,19 +234,19 @@ def colourSnake(s):
 def renderSnakes():
     for pan in panels.values(): #TODO do more efficentnly
         for j in range(size):
-            pan[2][j] = 0
+            pan[AR][j] = 0
 
-    for s in snakes:
-        for p in s.pixels:
-            pan = p.posi>>16 & 0xFF
-            x = p.posi>>8 & 0xFF
-            y = p.posi & 0xFF
-            panelarray = panels[pan][2]
-            panelarray[y*panPxPerEdge + x] = p.colour
+    for snake in snakes:
+        for px in snake.pixels:
+            pan = px.posi>>16 & 0xFF #TODO use byte array instead
+            x = px.posi>>8 & 0xFF
+            y = px.posi & 0xFF
+            panelarray = panels[pan][AR]
+            panelarray[y*panPxPerEdge + x] = px.colour
 
     for pan in panels.values(): 
-        pan[1].put(pan[2], shiftleft)
-
+        pan[SM].put(pan[AR], shiftleft)
+        time.sleep_ms(20)
 
 
 def runCube(pans, px_per_edge, seconds):
@@ -264,11 +262,36 @@ def runCube(pans, px_per_edge, seconds):
 
     makeSnake() # make the first snake
 
-    timer.init(period=100, callback=iteration(1))
+    # tim.init(period=100, mode=Timer.PERIODIC, callback=iteration)
+    # time.sleep(seconds)
 
-    # for i in range(10*seconds): # controlled TEST
-    #     iteration(1)
-    #     time.sleep(0.1)
+    for i in range(seconds*10): # controlled TEST
+        timerHandler(1)
+        time.sleep(0.1)
+   
+
+
+def runWall(pans, px_per_edge, seconds):
+    global panels
+    panels = pans
+    global panPxPerEdge 
+    panPxPerEdge = px_per_edge
+    global size
+    size = panPxPerEdge*panPxPerEdge
+
+    for pan in panels.values():
+        pan[2] = array.array("I", [0 for _ in range(size)])
+
+    makeSnake() # make the first snake
+
+    # tim.init(period=100, mode=Timer.PERIODIC, callback=timerHandler(1))
+    # time.sleep(seconds)
+    # tim.deinit()
+
+    for i in range(int(seconds*10)):
+        timerHandler(2)
+        # iteration(2)
+        time.sleep(0.1)
 
 
 def printSnake(s):

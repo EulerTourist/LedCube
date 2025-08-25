@@ -10,14 +10,6 @@ NUM_LEDS = 256
 delay_1 = 20
 
 BLACK = (0, 0, 1)
-RED = (25, 0, 0)
-YELLOW = (25, 15, 0)
-GREEN = (0, 25, 0)
-CYAN = (0, 20, 25)
-BLUE = (0, 0, 25)
-MAG = (18, 0, 25)
-COLS = (RED, YELLOW, GREEN, CYAN, BLUE, MAG)
-
 
 ## INIT ##
 panels = {  #up, down, front, back, left, right
@@ -43,7 +35,7 @@ def pixels_fill(col):
         pixels[i] = col[1]<<16 | col[0]<<8 | col[2]
     
 
-def wheel2(hue=0.5, sat=1.0, val_br=0.2):
+def wheel1(hue=0.5, sat=1.0, val_br=0.1):
     r,g,b = hsv_to_rgb(hue, sat, val_br) # pyright: ignore[reportGeneralTypeIssues]
     return ( int(round(255*r)), int(round(255*g)), int(round(255*b)) )
  
@@ -51,7 +43,7 @@ def wheel2(hue=0.5, sat=1.0, val_br=0.2):
 def rainbow():
     for i in range(NUM_LEDS):
         h = i*1.0/NUM_LEDS
-        col = wheel2(hue = h, val_br=0.1)
+        col = wheel1(hue = h, val_br=0.1)
         pixels[i] = col[1]<<16 | col[0]<<8 | col[2] 
 
 
@@ -98,7 +90,7 @@ for pan in panels.values():
 time.sleep_ms(1000)
 
 # Snakes
-snakes.runCube(panels, 16, 100) # pass info about machines, machine to panel pin, and size of panels
+snakes.runCube(panels, 16, 10) # pass info about machines/panels, size of panels, run duration
 time.sleep_ms(1000)
 
 ## Idle ##
