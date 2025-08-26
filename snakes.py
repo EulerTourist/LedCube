@@ -18,9 +18,9 @@ class Snake:
         self.pixels = pixels #deque
 
 PIN = 0; SM = 1; AR = 2
-maxsnakes = 4
+maxsnakes = 8
 maxage = 32
-maxsnakelen = 10
+maxsnakelen = 16
 snakes = deque([], maxsnakes)
 panPxPerEdge = 4; panAcross = 4; panDown = 4
 turniness = 10 # higher means lower probablity of turning this iteration
@@ -246,7 +246,7 @@ def renderSnakes():
 
     for pan in panels.values(): 
         pan[SM].put(pan[AR], shiftleft)
-        time.sleep_ms(20)
+        time.sleep_ms(10)
 
 
 def runCube(pans, px_per_edge, seconds):
@@ -265,9 +265,9 @@ def runCube(pans, px_per_edge, seconds):
     # tim.init(period=100, mode=Timer.PERIODIC, callback=iteration)
     # time.sleep(seconds)
 
-    for i in range(seconds*10): # controlled TEST
+    for i in range(int(seconds*10)): # controlled TEST
         timerHandler(1)
-        time.sleep(0.1)
+        time.sleep(0.01)
    
 
 
@@ -291,7 +291,7 @@ def runWall(pans, px_per_edge, seconds):
     for i in range(int(seconds*10)):
         timerHandler(2)
         # iteration(2)
-        time.sleep(0.1)
+        # time.sleep(0.01)
 
 
 def printSnake(s):

@@ -90,7 +90,7 @@ for pan in panels.values():
 time.sleep_ms(1000)
 
 # Snakes
-snakes.runCube(panels, 16, 10) # pass info about machines/panels, size of panels, run duration
+snakes.runCube(panels, 16, 20) # pass info about machines/panels, size of panels, run duration
 time.sleep_ms(1000)
 
 ## Idle ##
