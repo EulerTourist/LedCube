@@ -51,46 +51,47 @@ def rainbow():
 
 ############ Execution ##############
 ## Faces TODO FIX
-pixels = array.array("I", flatten(font['U']))
-panels[0][1].put(pixels, 8)
-time.sleep_ms(delay_1)
-
-pixels = array.array("I", flatten(font['D']))
-panels[1][1].put(pixels, 8)
-time.sleep_ms(delay_1)
-
-pixels = array.array("I", flatten(font['F']))
-panels[2][1].put(pixels, 8)
-time.sleep_ms(delay_1)
-
-pixels = array.array("I", flatten(font['B']))
-panels[3][1].put(pixels, 8)
-time.sleep_ms(delay_1)
-
-pixels = array.array("I", flatten(font['L']))
-panels[4][1].put(pixels, 8)
-time.sleep_ms(delay_1)
-
-pixels = array.array("I", flatten(font['R']))
-panels[5][1].put(pixels, 8)
-time.sleep_ms(1000)
-
-# Hearts
-pixels = array.array("I", flatten(font['H']))
-for pan in panels.values():
-    pan[1].put(pixels, 8)
+if(False):
+    pixels = array.array("I", flatten(font['U']))
+    panels[0][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-time.sleep_ms(1000)
 
-# Rainbow
-rainbow()
-for pan in panels.values():
-    pan[1].put(pixels, 8)
+    pixels = array.array("I", flatten(font['D']))
+    panels[1][1].put(pixels, 8)
     time.sleep_ms(delay_1)
-time.sleep_ms(1000)
+
+    pixels = array.array("I", flatten(font['F']))
+    panels[2][1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+
+    pixels = array.array("I", flatten(font['B']))
+    panels[3][1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+
+    pixels = array.array("I", flatten(font['L']))
+    panels[4][1].put(pixels, 8)
+    time.sleep_ms(delay_1)
+
+    pixels = array.array("I", flatten(font['R']))
+    panels[5][1].put(pixels, 8)
+    time.sleep_ms(1000)
+
+    # Hearts
+    pixels = array.array("I", flatten(font['H']))
+    for pan in panels.values():
+        pan[1].put(pixels, 8)
+        time.sleep_ms(delay_1)
+    time.sleep_ms(1000)
+
+    # Rainbow
+    rainbow()
+    for pan in panels.values():
+        pan[1].put(pixels, 8)
+        time.sleep_ms(delay_1)
+    time.sleep_ms(1000)
 
 # Snakes
-snakes.runCube(panels, 16, 20) # pass info about machines/panels, size of panels, run duration
+snakes.runCube(panels, 16, 2) # pass info about machines/panels, size of panels, run duration
 time.sleep_ms(1000)
 
 ## Idle ##

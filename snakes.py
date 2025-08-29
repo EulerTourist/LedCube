@@ -5,9 +5,28 @@ from machine import Timer
 from colorsys import hsv_to_rgb
 
 class Px:
-    def __init__(self, posi, colour):
-        self.posi = posi #int of PXY TODO use a byte array here bytes[3]
-        self.colour = colour #int of RGB TODO use a byte array here bytes[3]
+    pan=0; x=0; y=0
+    r=0; g=0; b=0
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    def setPosi(self, posi):
+        self.pan = posi[0]
+        self.x = posi[1]
+        self.y = posi[2]
+
+    def getPosi(self):
+        return (self.pan, self.x, self.y)
+      
+    def setCol(self, col):
+        self.r = col[0]
+        self.g = col[1]
+        self.b = col[2]
+
+    def getCol(self):
+        return (self.r, self.g, self.b)
 
 class Snake:
     age = 1
@@ -16,6 +35,7 @@ class Snake:
         self.dir = dir #integer
         self.body = body
         self.pixels = pixels #deque
+
 
 PIN = 0; SM = 1; AR = 2
 maxsnakes = 8
@@ -26,7 +46,6 @@ panPxPerEdge = 4; panAcross = 4; panDown = 4
 turniness = 10 # higher means lower probablity of turning this iteration
 fertility = 25 # higher means lower probablity of creating a snake this iteration
 growth_rate = 10 # cycles till next lengthening
-
 shiftleft = 8 # at sm.put(array, shift)
 
 turns_idx = ['12', '3', '6', '9']
@@ -39,7 +58,7 @@ turns = { # key off current direction to get possible turns
 
 cube_idx = [ b'U', b'D', b'F', b'B', b'L', b'R']
 cube_tfm = { # key off current panel to get (target panel, transform)
-    0: [(3,3), (5,4), (2,5), (4,6)], # 0/90/180/270
+    0: [(3,3), (5,4), (2,5), (4,6)], # 12/3/6/9
     1: [(2,11), (5,12), (3,13), (4,14)],
     2: [(0,7), (5,1), (1,15), (4,2)],
     3: [(0,8), (4,1), (1,16), (5,2)],
@@ -69,35 +88,33 @@ def iteration(t):
 
 def makeSnake():
     #Random Pixel
-    pan = random.randint(0, 5) # TODO change this for Wall as opposed Cube
+    pan = random.randint(0, 5) # TODO make this generic for Wall or Cube
     x = random.randint(0, panPxPerEdge-1)
     y = random.randint(0, panPxPerEdge-1)
-    posi = pan<<16 | x<<8 | y
-    head = RED #red
-    #Pixel List
-    pixs = deque([Px( posi, head)], maxsnakelen) #new Px list for this snake, maxlen
+    head = Px() #Px Class
+    head.setPosi((pan,x,y)) #Px Class
+    head.setCol(RED) #Px Class
+    pixs = deque([head], maxsnakelen) #new Px list for this snake, maxlen
 
     #make a snake and add it to snakes list
     #random direction
     dir = turns_idx[random.randint(0, 3)]
     col = random.random()
     body_col = wheel2(hue = col)
-    snake = Snake( dir, body_col, pixs ) #dir, age, body, pixel list with first pixel
+    snake = Snake( dir, body_col, pixs ) #dir, body colour, pixel list with first pixel
     # print(hex(id(snake)))
     snakes.append(snake)
 
 
 def stepSnake(s): #add pixel to head of given snake
-    pan = s.pixels[0].posi >> 16 & 0xFF
-    x = s.pixels[0].posi >> 8 & 0xFF
-    y = s.pixels[0].posi & 0xFF
-
+    pan,x,y = s.pixels[0].getPosi() #find out where the head is  #Px Class
+    # print('stepSnake: pan/x/y', pan, x, y)
     # turn left or right?              #TODO do this better
     rnd = random.randint(1, turniness) #TODO do this better
     if rnd == 1:                       #TODO do this better
         s.dir = random.choice(turns[s.dir]) # type: ignore tested okay. In WALL mode check that we are not at edge TODO 
 
-    #work out next pixel location
+    # for current direction, are we just going to next pixel or crossing over to a new panel
     if s.dir == '12':
         if y > 0: y -=1
         else: pan, x, y, s.dir = edgeTransformCube(pan, x, y, 0)
@@ -110,22 +127,22 @@ def stepSnake(s): #add pixel to head of given snake
     elif s.dir == '9': 
         if x > 0: x-=1
         else: pan, x, y, s.dir = edgeTransformCube(pan, x, y, 3)
+    else: raise ValueError('stepSnake() says, what the hell?')
 
     #create a new pixel and add it to front of snakes Px queue
-    posi = pan<<16 | x<<8 | y
-    colour = RED #Full Red Head 
-    head = Px( posi, colour)
-    s.pixels.appendleft(head)
-    # decide whether to extend the tail
+    newhead = Px()  #Px Class
+    newhead.setPosi((pan,x,y)) #Px Class
+    newhead.setCol(RED) #Px Class
+    s.pixels.appendleft(newhead)
     s.age+=1
-    if len(s.pixels) > maxsnakelen: #and s.age%growth_rate: #extend length every Nth, otherwise delete the last pixel, effectively moving it along
+    if len(s.pixels) > maxsnakelen: #adding new head pixel head extends length every step, so delete the last pixel, effectively moving it along
         s.pixels.pop()
 
 
-def edgeTransformCube(pan, x, y, dir):
-    # print('edgeTransform:', pan, x, y, dir)
+def edgeTransformCube(pan, x, y, dir): # there's probably a better way to do this
+    # print( 'edgeTransformCube: pan/x/y/dir', pan, x, y, dir )
     pan1, transform = cube_tfm[pan][dir] #lookup
-    # print('pan1:', pan1, 'transform:' , transform)
+    # print( 'edgeTransformCube: pan1/transform', pan1, transform )
     if transform == 0: #nothing
         x1 = x; y1 = y; dir1 = dir
     elif transform == 1: # FBLR cube_tfm ->3 
@@ -220,15 +237,12 @@ def wheel2(hue=0.333, sat=1.0, val_br=0.05):
     red = int(round(255*r))
     green = int(round(255*g))
     blue = int(round(255*b))
-    return red<<8 | green<<16 | blue #flip the colours around
-
-RED = wheel2(hue=0.0)
-# GREEN = wheel2(val_br=0.05)
+    return (red, green, blue)
 
 
 def colourSnake(s):
     if len(s.pixels) > 1:
-        s.pixels[1].colour = s.body
+        s.pixels[1].setCol(s.body)  #Px Class
 
 
 def renderSnakes():
@@ -238,15 +252,14 @@ def renderSnakes():
 
     for snake in snakes:
         for px in snake.pixels:
-            pan = px.posi>>16 & 0xFF #TODO use byte array instead
-            x = px.posi>>8 & 0xFF
-            y = px.posi & 0xFF
+            pan,x,y = px.getPosi() #Px Class
+            r,g,b = px.getCol() #Px Class
             panelarray = panels[pan][AR]
-            panelarray[y*panPxPerEdge + x] = px.colour
+            panelarray[y*panPxPerEdge + x] = r<<8 | g<<16 | b
 
     for pan in panels.values(): 
         pan[SM].put(pan[AR], shiftleft)
-        time.sleep_ms(10)
+        time.sleep_ms(10) # should get an interrupt for this
 
 
 def runCube(pans, px_per_edge, seconds):
@@ -269,7 +282,6 @@ def runCube(pans, px_per_edge, seconds):
         timerHandler(1)
         time.sleep(0.01)
    
-
 
 def runWall(pans, px_per_edge, seconds):
     global panels
@@ -295,10 +307,8 @@ def runWall(pans, px_per_edge, seconds):
 
 
 def printSnake(s):
-    pan = s.pixels[0].posi >> 16 & 0xFF
-    x = s.pixels[0].posi >> 8 & 0xFF
-    y = s.pixels[0].posi & 0xFF
-    cols = list(map(lambda p: hex(p.colour), s.pixels))
+    pan, x, y = s.pixels[0]
+    # cols = list(map(lambda p: hex(p.colour), s.pixels))
     print(
         'id:', hex(id(s)), 
         'dir:', s.dir,
@@ -309,3 +319,7 @@ def printSnake(s):
         'y:', y,
         'age:', s.age
     )
+
+
+RED = wheel2(hue=0.0)
+# GREEN = wheel2(val_br=0.05)
