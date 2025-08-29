@@ -253,7 +253,7 @@ def renderSnakes():
     for snake in snakes:
         for px in snake.pixels:
             pan,x,y = px.getPosi() #Px Class
-            r,g,b = px.getCol() #Px Class
+            r,g,b = px.getCol() #Px Classge
             panelarray = panels[pan][AR]
             panelarray[y*panPxPerEdge + x] = r<<8 | g<<16 | b
 
