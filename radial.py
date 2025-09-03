@@ -34,23 +34,21 @@ def getRadius(col, row): #origin top-left
     return r
 
 
-def getColour(radius): #use circles, take radius and give colour
+def getColour(radius): #use circles, take radius and give colour for that pixel
     if radius < 0 or radius > 707: raise ValueError('value out of range')
-    # work out which band pixel is in based on radius
+    # work out which band pixel is in, based on radius
     band = 0
     for b in range(len(radii)-2, -1, -1):
         if radius >= radii[b][0]:
             band = b
             break
-    if radii[band+1][1] == radii[band][1]: # if two colours are the same short circuit
-        # print('colours are the same', radii[band][1], radii[band+1][1])
+    if radii[band+1][1] == radii[band][1]: # if two colours are the same, short circuit
         return radii[band][1] #just return the common colour
     else: # else work what proportion between colours a and b
-        # print('colours are different', radii[band][1], radii[band+1][1])
         interval = radii[band+1][0] - radii[band][0]
         portion = (radius - radii[band][0])/interval #between 0-1
         # print('band', band, 'radius', radius, 'interval', interval, 'portion', portion)
-        # find the intermediate colour between those two bases on portion
+        # find the intermediate colour between those two colours on portion
         def inter(p, a, b):
             a0, a1, a2 = a
             b0, b1, b2 = b
@@ -63,13 +61,7 @@ def getColour(radius): #use circles, take radius and give colour
         return colNew
 
 
-def makeRadial(pan, px_edge, config):
-    if px_edge%2: raise ValueError('only does even-sided squares') # check that edge is even... 
-    else: px_per_edge = px_edge
-    if not checkCircleInput(config): raise ValueError('values in circles out of range') # check that for all r, r > r-1, r[0] == 0
-    else: radii = config
-
-    # doDiag()  #north-west 
+def doDiag():  #north-west 
     for d in range(int(px_per_edge/2)):
         rad = getRadius(d,d)
         col = getColour(rad)
@@ -80,18 +72,38 @@ def makeRadial(pan, px_edge, config):
         pix[px_per_edge-d][d] = col
         pix[px_per_edge-d][px_per_edge-d] = col
         
-    # doSector() #north-west upper half 0-45deg sector
+
+def doSector(): #north-west upper half 0-45deg sector
     for y in range(int(px_per_edge/2-1)): #y = 0,1,2,3,4
         for x in range(y+1, int(px_per_edge/2)):
-            pass
-            # print(x,y)
-            #     1-0, 2-0, 3-0, 4-0, 5-0
+            #     1-0, 2-0, 3-0, 4-0, 5-0 ...X-Y
             #          2-1, 3-1, 4-1, 5-1
             #               3-2, 4-2, 5-2
             #                    4-3, 5-3
             #                         5-4
-        # copy this radially 4 x times, 
-        # mirror across the diag and copy that radially 4 x times
+            rad = getRadius(x, y)
+            col = getColour(rad)
+            # print(x, y, rad, col)
+            # copy radially 4 x times
+            # mirror across the diag and copy that radially 4 x times
+            pix[y][x] = col #pix[y][x]
+            pix[x][y] = col
+            pix[y][px_per_edge-x] = col
+            pix[x][px_per_edge-y] = col
+            pix[px_per_edge-y][x] = col
+            pix[px_per_edge-x][y] = col
+            pix[px_per_edge-y][px_per_edge-x] = col
+            pix[px_per_edge-x][px_per_edge-y] = col
+
+
+def makeRadial(pan, px_edge, config):
+    if px_edge < 2 or px_edge%2: raise ValueError('only does even-sided squares') # check that edge is even... 
+    else: px_per_edge = px_edge
+    if not checkCircleInput(config): raise ValueError('values in circles out of range') # check that for all r, r > r-1, r[0] == 0
+    else: radii = config
+    doDiag()
+    doSector()
+    #write pix -> panel
 
 
 ###### Execution #######
