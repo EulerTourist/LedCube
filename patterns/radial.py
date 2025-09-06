@@ -11,7 +11,7 @@ BK = (0,0,0)
 
 px_per_edge = 4
 num_pix = px_per_edge * px_per_edge
-pix = [[(0,0,0) for c in range(num_pix)] for r in range(num_pix)]
+pix = [[(0,0,0) for c in range(num_pix)] for r in range(num_pix)] #2D List
 # pixels = array("I", [0 for _ in range(num_pix)])
 radii = {}
 radius_corner = 707 #centre to absolute corner
@@ -95,22 +95,38 @@ def doSector(): #north-west upper half 0-45deg sector
             pix[px_per_edge-y][px_per_edge-x] = col
             pix[px_per_edge-x][px_per_edge-y] = col
 
+    
+def doCycle():
+    # iterate each colour in radii, nudge H,S or V of each
+    pass
 
-def makeRadial(pan, px_edge, config):
+
+def doRender():
+    #pix -> panels
+    # copy each 2D list 'pix' into its corresponding array
+    pass
+
+
+def makeRadial(pans, px_edge, rings):
     if px_edge < 2 or px_edge%2: raise ValueError('only does even-sided squares') # check that edge is even... 
     else: px_per_edge = px_edge
-    if not checkCircleInput(config): raise ValueError('values in circles out of range') # check that for all r, r > r-1, r[0] == 0
-    else: radii = config
+    if not checkCircleInput(rings): raise ValueError('values in circles out of range') # check that for all r, r > r-1, r[0] == 0
+    else: radii = rings
+    if not pans: raise ValueError('no panels to write to')
+    else:
+        global panels
+        panels = pans
+    
     doDiag()
     doSector()
-    #write pix -> panel
+    doRender()
 
 
 ###### Execution #######
-pan = {0: [0, None, None]} # sm_id: [pin, sm_ref, array]
+pan = {0: [0, None, None]} # sm_id: [pin, sm_object, array]
 
 
-config = { #2-5 items 
+rings = { #2-5 items 
     0: (0, MG), #radius, colour
     1: (400, MG),
     2: (450, CY),
@@ -118,7 +134,9 @@ config = { #2-5 items
     4: (radius_corner, BK),
 }
 
-makeRadial(pan, 8, config)
+px_per_side = 8
+# for pan in panels:
+makeRadial(pan, px_per_side, rings)
 
 # for row in range(num_pix):
 #     for col in range(num_pix):

@@ -66,7 +66,7 @@ cube_tfm = { # key off current panel to get (target panel, transform)
     5: [(0,10), (3,1), (1,18), (2,2)]
 }
 
-tim = Timer(-1)
+# tim = Timer(-1)
 
 
 def timerHandler(t): 
@@ -246,10 +246,12 @@ def colourSnake(s):
 
 
 def renderSnakes():
+    #clear array of previous data
     for pan in panels.values(): #TODO do more efficentnly
         for j in range(size):
             pan[AR][j] = 0
 
+    #write snakes to arrays
     for snake in snakes:
         for px in snake.pixels:
             pan,x,y = px.getPosi() #Px Class
@@ -257,11 +259,13 @@ def renderSnakes():
             panelarray = panels[pan][AR]
             panelarray[y*panPxPerEdge + x] = r<<8 | g<<16 | b
 
+    #write each array to corresponding panel
     for pan in panels.values(): 
         pan[SM].put(pan[AR], shiftleft)
         time.sleep_ms(10) # should get an interrupt for this
 
 
+### Execution ###
 def runCube(pans, px_per_edge, seconds):
     global panels
     panels = pans
