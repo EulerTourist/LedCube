@@ -4,31 +4,33 @@ from machine import Pin
 from colorsys import hsv_to_rgb # Local
 from font import font, flatten # Local
 from driver import ws2812 #local
-import snakes #local
+# import snakes #local
+from patterns.stars import runStars
 
 NUM_LEDS = 256
 delay_1 = 20
 
 BLACK = (0, 0, 1)
+PIN = 0; SM = 1; AR = 2
 
 ## INIT ##
 panels = {  #up, down, front, back, left, right
     0: [0, None, None], # sm_id: [pin, sm_ref, array]
-    1: [1, None, None],
-    2: [2, None, None], # TODO make this a tuple
-    3: [3, None, None],
-    4: [4, None, None],
-    5: [5, None, None]
+    # 1: [1, None, None],
+    # 2: [2, None, None], # TODO make this a tuple
+    # 3: [3, None, None],
+    # 4: [4, None, None],
+    # 5: [5, None, None]
 }
 
-pixels = array.array("I", [0 for _ in range(NUM_LEDS)])
 
-
+# instantiate all machines in dictionary
 for i in panels.keys():
-    panels[i][1] = rp2.StateMachine(i, ws2812, freq=8_000_000, sideset_base=Pin(panels[i][0])) # pyright: ignore[reportCallIssue]
-    panels[i][1].active(1)
+    panels[i][SM] = rp2.StateMachine(i, ws2812, freq=8_000_000, sideset_base=Pin(panels[i][0])) # pyright: ignore[reportCallIssue]
+    panels[i][SM].active(1)
 
-
+#this is used by rainbow, idle, stars
+pixels = array.array("I", [0 for _ in range(NUM_LEDS)])
 ## Functions ##
 def pixels_fill(col):
     for i in range(NUM_LEDS): #
@@ -90,8 +92,13 @@ if(False):
         time.sleep_ms(delay_1)
     time.sleep_ms(1000)
 
-# Snakes
-snakes.runCube(panels, 16, 2) # pass info about machines/panels, size of panels, run duration
+    # Snakes
+    snakes.runCube(panels, 16, 2) # pass info about machines/panels, size of panels, run duration
+    time.sleep_ms(1000)
+
+# stars
+panels[0][AR] = pixels
+runStars(panels, 16, 128, 400)
 time.sleep_ms(1000)
 
 ## Idle ##

@@ -16,9 +16,9 @@ ValueMax = 0.1
 ValueMin = 0
 ValueInc = (ValueMax - ValueMin) / 100
 HeightMin = 2
-HeightMax = panPxPerEdge
+HeightMax = panPxPerEdge-2
 WidthMin = 2
-WidthMax = panPxPerEdge
+WidthMax = panPxPerEdge-2
 AgeMax = 100
 
 shiftleft = 8 # at sm.put(array, shift)
@@ -73,10 +73,10 @@ def cycle(t):
 
 def makeRect():
     pan = random.randint(0, 5) # TODO make this generic for Wall or Cube
-    x = random.randint(0, panPxPerEdge-1)
-    y = random.randint(0, panPxPerEdge-1)
     height = random.randint(HeightMin, HeightMax)
     width = random.randint(WidthMin, WidthMax)
+    x = random.randint(0, panPxPerEdge-1-width)
+    y = random.randint(0, panPxPerEdge-1-height)
     hue = random.random()
     rect = Rect()
     rect.setDims((pan,x,y, height, width)) 
@@ -84,7 +84,7 @@ def makeRect():
     rects.append(rect)
 
 
-def iterateRects():
+def iterateRects(): #TODO for now this is just per panel, not crossing edges
     for rect in rects:
         rect.age += 1
         if rect.age >= AgeMax: continue
@@ -93,25 +93,37 @@ def iterateRects():
         side = ran//2 # 0-top, 1-bottom, 2-left, 3-right
         grow = ran%2 # 0-shrink, 1-grow
         if side == 0: # Top
-            if grow:
-                rect.height = min(HeightMax, rect.height+1)
-                rect.x = max(0, rect.x-1)
+            if grow: 
+                if rect.y > 0 and rect.height < HeightMax:
+                    rect.y -= 1
+                    rect.height += 1
             else:
-                rect.height = max(HeightMin, rect.height-1)
-                rect.x = min(panPxPerEdge-1-rect.height, rect.x + 1)
+                if rect.height > HeightMin:
+                    rect.height -= 1
+                    rect.y += 1 #NOTE not checking bounds here
         elif side == 1: # Bottom
-            if grow: rect.height += 1
-            else: rect.height -= 1
+            if grow: 
+                if rect.height < HeightMax:
+                    rect.height += 1
+            else: 
+                if rect.height > HeightMin:
+                    rect.height -= 1
         elif side == 2: # Left
-            if grow:
-                rect.y -= 1
-                rect.width += 1
+            if grow: 
+                if rect.x > 0 and rect.width < WidthMax:
+                    rect.x -= 1
+                    rect.width += 1
             else:
-                rect.y += 1
-                rect.width -= 1
+                if rect.width > WidthMin:
+                    rect.width -= 1
+                    rect.x += 1 #NOTE not checking bounds here
         else: # Right
-            if grow: rect.width += 1
-            else: rect.width -= 1
+            if grow: 
+                if rect.width < WidthMax:
+                    rect.width += 1
+            else: 
+                if rect.width > WidthMin:
+                    rect.width -= 1
 
 
 def printRects():

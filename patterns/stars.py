@@ -1,20 +1,19 @@
 import random, time, array
-from collections import deque
-# from ucollections import deque
+# from collections import deque
+from ucollections import deque
 # from micropython import schedule
 # from machine import Timer
 from colorsys import hsv_to_rgb
 
 PIN = 0; SM = 1; AR = 2
-maxstars = 4
+maxstars = 16
 stars = deque([], maxstars)
-panPxPerEdge = 4; panAcross = 4; panDown = 4
-
+panPxPerEdge = 2; panAcross = 2; panDown = 2
 HueCentre = 0.5
 HueWidth = 0.5
 ValueMax = 0.1
 ValueMin = 0
-ValueInc = (ValueMax - ValueMin) / 100
+ValueInc = (ValueMax - ValueMin) / 20
 shiftleft = 8 # at sm.put(array, shift)
 
 class Px:
@@ -57,16 +56,17 @@ def iterate(t):
     if len(stars) < maxstars:
         makeStar()
 
-    renderStars()
-
     for star in stars:
        star.v = max(ValueMin, star.v - ValueInc)
+
+    renderStars()
     
 
 
 def makeStar():
     # Random Pixel
-    pan = random.randint(0, 5) # TODO make this generic for Wall or Cube
+    # pan = random.randint(0, 5) # TODO make this generic for Wall or Cube
+    pan = 0
     x = random.randint(0, panPxPerEdge-1)
     y = random.randint(0, panPxPerEdge-1)
     hue = random.random()
@@ -83,27 +83,41 @@ def printStars():
 
 
 def renderStars():
-    printStars()
+    # printStars()
     # #clear array of previous data
     # for pan in panels.values(): #TODO do more efficentnly
     #     for j in range(size):
     #         pan[AR][j] = 0
 
     # #write snakes to arrays
-    # for px in stars:
-    #     pan,x,y = px.getPosi() #Px Class
-    #     r,g,b = wheel(px.getCol())
-    #     panelarray = panels[pan][AR]
-    #     panelarray[y*panPxPerEdge + x] = r<<8 | g<<16 | b
+    for px in stars:
+        # pan,x,y = px.getPosi() #Px Class
+        # h,s,v = px.getCol()
+        r,g,b = wheel(px.h,px.s,px.v)
+        panelarray = panel[AR]
+        panelarray[px.y*panPxPerEdge + px.x] = r<<8 | g<<16 | b
 
     # #write each array to corresponding panel
-    # for pan in panels.values(): 
-    #     pan[SM].put(pan[AR], shiftleft)
-    #     time.sleep_ms(10) # should get an interrupt for this
+    panel[SM].put(panel[AR], shiftleft)
+    time.sleep_ms(10) # should get an interrupt for this
+
+
+def runStars(pans, px_per_edge, starcount, iterations):
+    global panel
+    panel = pans[0]
+    global panPxPerEdge
+    panPxPerEdge = px_per_edge
+    global maxstars
+    maxstars = starcount
+
+    for i in range(iterations):
+        iterate(0)
+        time.sleep(0.2)
+
 
 
 ### execution ###
-panPxPerEdge = 6
-for i in range(100):
-    iterate(0)
-    time.sleep(0.1)
+# panPxPerEdge = 6
+# for i in range(100):
+#     iterate(0)
+#     time.sleep(0.1)
