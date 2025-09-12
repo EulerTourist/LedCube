@@ -6,6 +6,7 @@ from font import font, flatten # Local
 from driver import ws2812 #local
 # import snakes #local
 from patterns.stars import runStars
+from patterns.radial import runRadial
 
 NUM_LEDS = 256
 delay_1 = 20
@@ -96,10 +97,34 @@ if(False):
     snakes.runCube(panels, 16, 2) # pass info about machines/panels, size of panels, run duration
     time.sleep_ms(1000)
 
-# stars
+    # stars
+    panels[0][AR] = pixels
+    runStars(panels, 16, 64, 300) # panels, edge, stars. iterations
+    time.sleep_ms(1000)
+
+# Radial
+CY = (0,255,255)
+MG = (255,0,255)
+YL = (255,255,0)
+RD = (255,0,0)
+GR = (0,255,0)
+BL = (0,0,255)
+BK = (0,0,0)
+
+radius_corner = 707 #centre to absolute corner
+radius_side = 500 #centre to absolute edge
+rings = { #2-5 items 
+    0: (0, MG), #radius, colour
+    1: (400, MG),
+    2: (450, CY),
+    3: (radius_side, BK),
+    4: (radius_corner, BK),
+}
+
 panels[0][AR] = pixels
-runStars(panels, 16, 128, 400)
+runRadial(panels=panels, px_per_edge=16, raddii=rings) 
 time.sleep_ms(1000)
+
 
 ## Idle ##
 pixels_fill(BLACK)

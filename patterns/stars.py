@@ -6,14 +6,12 @@ from ucollections import deque
 from colorsys import hsv_to_rgb
 
 PIN = 0; SM = 1; AR = 2
-maxstars = 16
-stars = deque([], maxstars)
-panPxPerEdge = 2; panAcross = 2; panDown = 2
-HueCentre = 0.5
-HueWidth = 0.5
-ValueMax = 0.1
-ValueMin = 0
-ValueInc = (ValueMax - ValueMin) / 20
+
+maxstars = 4
+panPxPerEdge = 2; pansAcross = 2; pansDown = 2
+HueCentre = 0.125; HueWidth = 0.10
+ValueMin = 0; ValueMax = 0.1
+ValueInc = (ValueMax - ValueMin) / 20 #TODO it shouldn't be linear, apply gamma
 shiftleft = 8 # at sm.put(array, shift)
 
 class Px:
@@ -62,17 +60,20 @@ def iterate(t):
     renderStars()
     
 
-
 def makeStar():
     # Random Pixel
     # pan = random.randint(0, 5) # TODO make this generic for Wall or Cube
+    # if not stars: return
     pan = 0
     x = random.randint(0, panPxPerEdge-1)
     y = random.randint(0, panPxPerEdge-1)
-    hue = random.random()
+    sat = random.random()
+    low = max(0, HueCentre-HueWidth)
+    high = min(HueCentre+HueWidth, 1)
+    hue = random.uniform(low, high)
     star = Px() #Px Class
     star.setPosi((pan,x,y)) #Px Class
-    star.setCol((hue,1.0,ValueMax)) #Px Class
+    star.setCol((hue,sat,ValueMax)) #Px Class
     # print(hex(id(star)), star.getPosi(), star.getCol())
     stars.append(star)
 
@@ -109,6 +110,8 @@ def runStars(pans, px_per_edge, starcount, iterations):
     panPxPerEdge = px_per_edge
     global maxstars
     maxstars = starcount
+    global stars
+    stars = deque([], starcount)
 
     for i in range(iterations):
         iterate(0)

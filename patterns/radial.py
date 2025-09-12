@@ -1,18 +1,10 @@
 from array import array
 from math import sqrt
 
-CY = (0,255,255)
-MG = (255,0,255)
-YL = (255,255,0)
-RD = (255,0,0)
-GR = (0,255,0)
-BL = (0,0,255)
-BK = (0,0,0)
-
 px_per_edge = 4
 num_pix = px_per_edge * px_per_edge
 pix = [[(0,0,0) for c in range(num_pix)] for r in range(num_pix)] #2D List
-# pixels = array("I", [0 for _ in range(num_pix)])
+panels = {}
 radii = {}
 radius_corner = 707 #centre to absolute corner
 radius_side = 500 #centre to absolute edge
@@ -107,39 +99,27 @@ def doRender():
     pass
 
 
-def makeRadial(pans, px_edge, rings):
-    if px_edge < 2 or px_edge%2: raise ValueError('only does even-sided squares') # check that edge is even... 
-    else: px_per_edge = px_edge
-    if not checkCircleInput(rings): raise ValueError('values in circles out of range') # check that for all r, r > r-1, r[0] == 0
-    else: radii = rings
-    if not pans: raise ValueError('no panels to write to')
-    else:
-        global panels
-        panels = pans
+### RUN ###
+
+
+def runRadial(**kwargs):
+    for k,v in kwargs.items():
+        globals()[k] = v
+
+    if px_per_edge < 2 or px_per_edge%2: 
+        print('pixel count along edge should be even and 2 or more')
+        return
+
+    if not radii and checkCircleInput(radii): 
+        print('the raddii object is not complaint')
+        return
+
+    if not panels: # may need to add structure check here as above
+        print('i don\'t have any panels to talk to, check structure')
+        return
     
+    # everything seems okay, let's go
     doDiag()
     doSector()
     doRender()
 
-
-###### Execution #######
-pan = {0: [0, None, None]} # sm_id: [pin, sm_object, array]
-
-
-rings = { #2-5 items 
-    0: (0, MG), #radius, colour
-    1: (400, MG),
-    2: (450, CY),
-    3: (radius_side, BK),
-    4: (radius_corner, BK),
-}
-
-px_per_side = 8
-# for pan in panels:
-makeRadial(pan, px_per_side, rings)
-
-# for row in range(num_pix):
-#     for col in range(num_pix):
-#         x,y,r = getRadius(col, row)
-#         # print( 'col:', col, 'x:', x, '\trow:', row, 'y:', y, 'radius:', r) 
-#         print( 'col:', col, '\trow:', row, '\tradius:', r) 
