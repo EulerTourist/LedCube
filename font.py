@@ -20,7 +20,7 @@ C = wheel2(hue=300)
 # print('green:', hex(G))
 # print('blue:', hex(B))
 
-
+font_idx = ['U','D','F','B','L','R','H']
 font = {
     'U':[ # RD on CY
         [C]*16,
@@ -104,3 +104,4 @@ def flatten(xss):
 # for r in font[B]:
 #     print(flatten(r))
 # print(flatten(font['B']))
+# print(flatten(font[font_idx[1]]))
