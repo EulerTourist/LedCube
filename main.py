@@ -5,7 +5,7 @@ from colorsys import hsv_to_rgb # Local
 from font import font, flatten # Local
 from driver import ws2812 #local
 
-from patterns.stars import runStars
+# from patterns.stars import runStars
 # from patterns.radial import runRadial
 from patterns.drips import runDrips
 # from patterns.snakes import runSnakes

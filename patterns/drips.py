@@ -95,7 +95,7 @@ def moveDrip(drip):
     pan,x,y = drip.pixels[0].getPosi()
     
     if y >= px_per_edge-1: 
-        drip.pixels.pop()
+        drip.pixels.pop() #note: this pop always happens but usually implicitly due to maxlen on deque
         if not len(drip.pixels): # make age = 0 if tail goes off the panel
             drip.age = 0
     else: 
