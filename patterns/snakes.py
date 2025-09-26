@@ -266,7 +266,7 @@ def renderSnakes():
 
 
 ### Execution ###
-def runCube(pans, px_per_edge, seconds):
+def runSnakes(pans, px_per_edge, iterations):
     global panels
     panels = pans
     global panPxPerEdge 
@@ -282,7 +282,7 @@ def runCube(pans, px_per_edge, seconds):
     # tim.init(period=100, mode=Timer.PERIODIC, callback=iteration)
     # time.sleep(seconds)
 
-    for i in range(int(seconds*10)): # controlled TEST
+    for i in range(iterations): # controlled TEST
         timerHandler(1)
         time.sleep(0.01)
    

@@ -110,7 +110,7 @@ def moveDrip(drip):
 def renderDrips():
     # #clear array of previous data
     for pan in panels.values(): #TODO do more efficentnly
-        for j in range(px_per_edge*px_per_edge):
+        for j in range(len(pan[AR])):
             pan[AR][j] = 0
 
     panelarray = panels[0][AR] #NOTE temp

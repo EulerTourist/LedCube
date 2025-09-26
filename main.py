@@ -2,13 +2,7 @@ import array, time, rp2
 from machine import Pin
 
 from colorsys import hsv_to_rgb # Local
-from font import font, flatten # Local
 from driver import ws2812 #local
-
-# from patterns.stars import runStars
-# from patterns.radial import runRadial
-from patterns.drips import runDrips
-# from patterns.snakes import runSnakes
 
 NUM_LEDS = 256
 delay_1 = 20
@@ -27,12 +21,12 @@ WH = (0,0,0.1)
 
 ## INIT ##
 panels = {  #up, down, front, back, left, right
-    0: [0, None, None], # sm_id: [pin, sm_ref, array]
-    # 1: [1, None, None],
-    # 2: [2, None, None], # TODO make this a tuple
-    # 3: [3, None, None],
-    # 4: [4, None, None],
-    # 5: [5, None, None]
+    0: [0, None, []], # sm_id: [pin, sm_ref, array]
+    1: [1, None, []],
+    2: [2, None, []], # TODO make this a tuple
+    3: [3, None, []],
+    4: [4, None, []],
+    5: [5, None, []]
 }
 
 
@@ -64,82 +58,74 @@ def rainbow():
 
 
 ############ Execution ##############
-## Faces TODO FIX
-if(False):
-    pixels = array.array("I", flatten(font['U']))
-    panels[0][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
+from patterns.font import font, flatten, font_idx # Local
+from patterns.snakes import runSnakes
+from patterns.radial import runRadial
+from patterns.stars import runStars
+from patterns.drips import runDrips
 
-    pixels = array.array("I", flatten(font['D']))
-    panels[1][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
 
-    pixels = array.array("I", flatten(font['F']))
-    panels[2][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-
-    pixels = array.array("I", flatten(font['B']))
-    panels[3][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-
-    pixels = array.array("I", flatten(font['L']))
-    panels[4][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-
-    pixels = array.array("I", flatten(font['R']))
-    panels[5][1].put(pixels, 8)
+if(True): # Face Indicators 6
+    for i in panels.keys():
+        # print(i, font_idx[i])
+        colours = flatten(font[font_idx[i]])
+        pixels = array.array("I", colours)
+        panels[i][SM].put(pixels, 8)
+        time.sleep_ms(delay_1)
     time.sleep_ms(1000)
 
-    # Hearts
+if(True): # Hearts 6
     pixels = array.array("I", flatten(font['H']))
     for pan in panels.values():
         pan[1].put(pixels, 8)
         time.sleep_ms(delay_1)
     time.sleep_ms(1000)
 
-    # Rainbow
+if(True): # Rainbow 6
     rainbow()
     for pan in panels.values():
         pan[1].put(pixels, 8)
         time.sleep_ms(delay_1)
     time.sleep_ms(1000)
 
-    # Snakes
-    snakes.runCube(panels, 16, 2) # pass info about machines/panels, size of panels, run duration
+if(True): # Snakes 6
+    runSnakes(panels, 16, 20) # pass info about machines/panels, size of panels, run duration
     time.sleep_ms(1000)
 
-    # Radial HSV
+if(True): # Radial HSV 1
     radius_corner = 700 #centre to absolute corner
     radius_side = 500 #centre to absolute edge
     rings = { 
-        0: (0, BL), #radius, colour
-        1: (200, BL),
-        2: (300, MG),
-        3: (450, MG),
-        4: (550, BL),
-        5: (700, BL),
+        0: (0, RD), #radius, colour
+        1: (200, YL),
+        2: (300, GR),
+        3: (400, BL),
+        4: (500, BK),
+        5: (700, BK)
     }
 
     panels[0][AR] = pixels
     runRadial(panels=panels, px_per_edge=16, radii=rings) 
-    time.sleep_ms(10000)
-# stars
-panels[0][AR] = pixels
-runStars(panels, 16, 64, 300) # panels, edge, stars. iterations
-time.sleep_ms(1000)
+    time.sleep_ms(1000)
 
-# Drips
-# HueCentre = 0.125, HueWidth = 0.10, 
-panels[0][AR] = pixels
-runDrips( panels=panels, px_per_edge=16, iterations = 200, maxdrips = 8, max_drip_length = 8, HueCentre = 0.333, HueWidth = 0.05 )
-time.sleep_ms(1000)
+if(True): # Stars 1
+    panels[0][AR] = pixels
+    runStars(panels, 16, 64, 100) # panels, edge, stars. iterations
+    time.sleep_ms(1000)
+
+if(True): # Drips 1
+    # HueCentre = 0.125, HueWidth = 0.10, 
+    panels[0][AR] = pixels
+    runDrips( panels=panels, px_per_edge=16, iterations = 20, maxdrips = 8, max_drip_length = 6, HueCentre = 0.333, HueWidth = 0.05 )
+    time.sleep_ms(1000)
+
+if(True): ## END ##
+    pixels_fill(BLACK)
+    for i in panels.keys():
+        panels[i][1].put(pixels, 8)
+        time.sleep_ms(delay_1)
+        panels[i][1].active(0)
 
 
-## Idle ##
-pixels_fill(BLACK)
-for i in panels.keys():
-    panels[i][1].put(pixels, 8)
-    time.sleep_ms(delay_1)
-    panels[i][1].active(0)
 
 print("Done...")
